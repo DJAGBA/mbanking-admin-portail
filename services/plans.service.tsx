@@ -1,5 +1,6 @@
 import axios from '@/lib/axios';
 import type { Plan,CreatePlanRequest,UpdatePlanRequest,ListPlansResponse,GetPlanResponse,} from '@/src/types/plan';
+import {APIResponse} from "@/src/types/ApiResponse";
 // GET /plans
 export const getPlans = async (
   page: number = 1,
@@ -16,19 +17,19 @@ export const getPlans = async (
 };
 
 // GET /plans/:id
-export const getPlanById = async (id: string) => {
+export const getPlanById = async (id: string): Promise<APIResponse<Plan>> => {
   const response = await axios.get<GetPlanResponse>(`/plans/${id}`);
-  return response.data.data;
+  return response.data as APIResponse<Plan>;
 };
 
 // POST /plans
-export const createPlan = async (data: CreatePlanRequest) => {
+export const createPlan = async (data: CreatePlanRequest):Promise<APIResponse<Plan>> => {
   const response = await axios.post<GetPlanResponse>('/plans', data);
-  return response.data.data;
+  return response.data as APIResponse<Plan>;
 };
 
 // PUT /plans/:id
-export const updatePlan = async (id: string, data: UpdatePlanRequest) => {
+export const updatePlan = async (id: string, data: UpdatePlanRequest): Promise<APIResponse<Plan>> => {
   const response = await axios.put<GetPlanResponse>(`/plans/${id}`, data);
-  return response.data.data;
+  return response.data as APIResponse<Plan>;
 };

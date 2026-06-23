@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Plan, CreatePlanRequest, UpdatePlanRequest } from '@/src/types/plan';
 import { X, Loader2 } from 'lucide-react';
+import { Play } from 'next/font/google';
 
 type PlanFormProps = Readonly<{
   plan?: Plan | null;
@@ -43,9 +44,11 @@ export function PlanForm({ plan, onSubmit, onCancel }: PlanFormProps) {
         pointsPerHour: Number(formData.pointsPerHour),
         pointsPerDay: Number(formData.pointsPerDay),
         description: formData.description,
-      };
+      } as unknown as CreatePlanRequest | UpdatePlanRequest;
       
-      await onSubmit(data);
+      const { ...payload } = data;
+      await onSubmit(data? payload as UpdatePlanRequest : data);
+
     } catch (err: unknown) {
       const error = err as Error;
       setError(error?.message || 'Une erreur est survenue');

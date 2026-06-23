@@ -69,8 +69,8 @@ export function AssignUrlUserStepper({
 
   const filteredUsers = useMemo(() =>
     users.filter(u =>
-      u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase())
+      u?.username?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+      u?.email?.toLowerCase()?.includes(searchTerm.toLowerCase())
     ), [users, searchTerm]);
 
   const totalUserPages = Math.ceil(filteredUsers.length / usersPerPage);
@@ -200,8 +200,8 @@ export function AssignUrlUserStepper({
                           {selectedUser?.id === u.id && <Check className="w-3 h-3 text-white" />}
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-gray-800">{u.username}</p>
-                          <p className="text-xs text-gray-500">{u.email}</p>
+                          <p className="text-sm font-bold text-gray-800">{u?.username}</p>
+                          <p className="text-xs text-gray-500">{u?.email}</p>
                         </div>
                       </div>
                     ))}

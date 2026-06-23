@@ -28,7 +28,7 @@ export default function BanksPage() {
     description?: string;
     isDangerous?: boolean;
     onConfirm: () => void;
-  } | null>(null);
+   }| null>(null);
 // Fetch the list of banks from the API with pagination and error handling
   const fetchBanks = useCallback(async () => {
     setLoading(true);
@@ -60,18 +60,18 @@ export default function BanksPage() {
   // Handler to create a new bank using the API, with error handling and success notification
   const handleCreate = async (data: CreateBankRequest) => {
   try {
-    const newBank = await createBank(data);
-
-    if (process.env.NEXT_PUBLIC_USE_MOCK === 'true' && newBank) {
-      setBanks(prev => [newBank, ...prev]);
-      setTotal(prev => prev + 1);
+    const response = await createBank(data);
+    if (response?.status?.code !== 200) {
+      setError(response?.status?.message ?? 'Erreur lors de la création');
     } else {
-      await fetchBanks();
+      if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
+        await fetchBanks();
+      } else {
+        await fetchBanks();
+      }
+      toast.success('Banque créée avec succès !');
+      setShowForm(false);
     }
-
-    toast.success('Banque créée avec succès !');
-    // Fermer le formulaire seulement après succès
-    setShowForm(false);
   } catch (err: unknown) {
     const error = err as Error;
     setError(error?.message || 'Erreur lors de la création');
@@ -81,8 +81,10 @@ export default function BanksPage() {
 const handleUpdate = async (data: UpdateBankRequest) => {
   try {
     if (editingBank) {
-      await updateBank(String(editingBank.id), data);
-
+     const response = await updateBank(String(editingBank.id), data);
+     if (response?.status?.code !== 200) {
+        setError(response?.status?.message ?? 'Erreur lors de la modification');
+      } else {
       if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
         setBanks(prev => prev.map(b =>
           b.id === editingBank.id ? { ...b, ...data } : b
@@ -90,12 +92,12 @@ const handleUpdate = async (data: UpdateBankRequest) => {
       } else {
         await fetchBanks();
       }
-
       toast.success('Banque modifiée avec succès !');
       // Fermer le formulaire seulement après succès
       setEditingBank(null);
       setShowForm(false);
     }
+      }
   } catch (err: unknown) {
     const error = err as Error;
     setError(error?.message || 'Erreur lors de la modification');
@@ -111,8 +113,11 @@ const handleUpdate = async (data: UpdateBankRequest) => {
       isDangerous: true,
       onConfirm: async () => {
         try {
-          await deleteBank(id);
-          if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
+         const response = await deleteBank(id);
+          if (response?.status?.code !== 200) {
+            setError(response?.status?.message ?? 'Erreur lors de la suppression');
+          }else{
+            if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
             setBanks(prev => prev.filter(b => String(b.id) !== id));
             setTotal(prev => prev - 1);
           } else {
@@ -120,6 +125,7 @@ const handleUpdate = async (data: UpdateBankRequest) => {
           }
           setDialogOpen(false);
           toast.success('Banque supprimée avec succès !');
+          } 
         } catch (err: unknown) {
           const error = err as Error;
           setError(error?.message || 'Erreur lors de la suppression');
@@ -310,3 +316,4 @@ const handleUpdate = async (data: UpdateBankRequest) => {
     </>
   );
 }
+ 

@@ -15,7 +15,7 @@ interface UserFormProps {
   readonly onSubmit: (data: CreateUserRequest | UpdateUserRequest) => Promise<void>;
   /** Callback to close the modal or cancel the current action */
   readonly onCancel: () => void;
-  parentError?: string | null;
+  parentError?: String | null;
 }
 
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -120,64 +120,22 @@ export function UserForm({ user, onSubmit, onCancel, parentError }: UserFormProp
 
     } catch (err: unknown) {
       const error = err as Error;
-      let msg = error?.message || 'Une erreur est survenue lors de l\'enregistrement';
+      const msg = error?.message || 'An error occurred while saving';
 
-      // Essayer de parser l'erreur si c'est du JSON
-      if (msg.startsWith('{')) {
+      if (msg.startsWith('{') || msg.startsWith('[')) {
         try {
           const parsed = JSON.parse(msg);
-          
-          // Vérifier si c'est une erreur de conflit (username déjà pris)
-          if (parsed?.status?.code === 4090 || parsed?.status?.message === 'Conflict') {
-            const username = formData.username || 'cet utilisateur';
-            setError(`Le nom d'utilisateur "${username}" est déjà pris. Veuillez en choisir un autre.`);
-            // Mettre en évidence le champ username
-            setFieldErrors({ username: 'Ce nom d\'utilisateur est déjà utilisé' });
-            return;
-          }
-          
-          // Si l'API renvoie des erreurs de validation de champ
           if (parsed && typeof parsed === 'object') {
-            // Vérifier si c'est un objet d'erreurs de champ
-            const hasFieldErrors = Object.keys(parsed).some(key => 
-              typeof parsed[key] === 'string' && key !== 'status' && key !== 'message'
-            );
-            
-            if (hasFieldErrors) {
-              setFieldErrors(parsed);
-              return;
-            }
-            
-            // Sinon, afficher la description de l'erreur
-            if (parsed.status?.description) {
-              setError(parsed.status.description);
-              return;
-            }
+            setFieldErrors(parsed);
+            return;
           }
         } catch {
           // Parsing failed, fallback gracefully
         }
       }
-
-      // Si l'erreur contient des informations sur le username déjà pris
-      if (msg.toLowerCase().includes('username') && msg.toLowerCase().includes('already taken')) {
-        setError(`Le nom d'utilisateur "${formData.username}" est déjà pris. Veuillez en choisir un autre.`);
-        setFieldErrors({ username: 'Ce nom d\'utilisateur est déjà utilisé' });
-        return;
-      }
-
       setError(msg);
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Fonction pour réinitialiser les erreurs lorsque l'utilisateur change le username
-  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleChange(e);
-    // Réinitialiser l'erreur spécifique au username si elle existe
-    if (fieldErrors.username) {
-      setFieldErrors(({ username: _, ...rest }) => rest);
     }
   };
 
@@ -228,7 +186,7 @@ export function UserForm({ user, onSubmit, onCancel, parentError }: UserFormProp
                 required
                 maxLength={50}
                 value={formData.username}
-                onChange={handleUsernameChange} // Utiliser la fonction spécialisée
+                onChange={handleChange}
                 disabled={!!user}
                 error={fieldErrors.username}
                 placeholder="johndoe"

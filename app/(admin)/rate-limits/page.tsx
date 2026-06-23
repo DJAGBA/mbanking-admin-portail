@@ -65,7 +65,6 @@ export default function LimitesPage() {
     setSuccessMessage(message);
     setTimeout(() => setSuccessMessage(''), 3000);
   };
-
   const fetchRateLimits = useCallback(async () => {
     setRateLimitsLoading(true);
     setRateLimitsError('');
@@ -100,22 +99,24 @@ export default function LimitesPage() {
           isDangerous: currentStatus,
           onConfirm: async () => {
            try {
-             await deactivateUserPlan(userId);
-             setRateLimitsDialogOpen(false);
-  
+          const response = await deactivateUserPlan(userId);
+          if (response?.status?.code !== 200) {
+          setUrlsError(response?.status?.description ?? 'Erreur lors de la modification du plan');
+          }else {
+            setRateLimitsDialogOpen(false);
              setRateLimits((prevLimits) => 
              prevLimits.map(r => 
              String(r.userId) === userId 
-            ? { ...r, active: !currentStatus } 
-          : r
+            ? { ...r, active: !currentStatus }: r
                 )
                  );
-  showSuccess(`Le plan de l'utilisateur ${target?.username || ''} a été ${actionText} avec succès !`);
-} catch (err: unknown) {
-  const error = err as Error;
-  setRateLimitsDialogOpen(false);
-  setRateLimitsError(error?.message || 'Erreur lors de la modification du plan');
-}
+             showSuccess(`Le plan de l'utilisateur ${target?.username || ''} a été ${actionText} avec succès !`);
+          }       
+        } catch (err: unknown) {
+           const error = err as Error;
+          setRateLimitsDialogOpen(false);
+          setRateLimitsError(error?.message || 'Erreur lors de la modification du plan');
+          }
           },
         });
       },
@@ -136,11 +137,15 @@ export default function LimitesPage() {
     setUrlsError('');
     try {
       const response = await getUrlLimits(urlsPage, urlsLimit);
-      if (response?.data?.items) {
+      if(response?.status?.code !== 200){
+      setUrlsError(response?.status?.description ?? 'Erreur lors du chargement');
+      }else {
+       if (response?.data?.items) {
         setUrls(response.data.items);
         setUrlsTotal(response.data.pagination?.total || 0);
         setUrlsTotalPages(response.data.pagination?.totalPages || 0);
-      }
+        }
+      }  
     } catch (err: unknown) {
       const error = err as Error;
       setUrlsError(error?.message || 'Erreur lors du chargement');
@@ -156,34 +161,38 @@ export default function LimitesPage() {
   };
 
   const handleSubmitAssignUser = async (userId: string, data: any) => {
-    try {
-      setUrlsLoading(true);
-      if (editingUser) {
-        await updateUrlLimitUser(assignUrlId!, editingUser.userId, data);
-        showSuccess('Limites modifiées avec succès !');
+  try {
+    setUrlsLoading(true);
+    if (editingUser) {
+      const response = await updateUrlLimitUser(assignUrlId!, editingUser.userId, data);
+      if (response?.status?.code !== 200) {
+        setUrlsError(response?.status?.description ?? 'Erreur lors de la modification');
       } else {
-        await assignUrlLimitUser(assignUrlId!, userId, data);
-        showSuccess('Utilisateur assigné avec succès !');
+        showSuccess('Limites modifiées avec succès !');
       }
-      await fetchUrls();
-      setShowAssignForm(false);
-      setAssignUrlId(null);
-      setEditingUser(null);
-    } catch (err: unknown) {
-      const error = err as Error;
-      setUrlsError(error.message || "Erreur lors de l'opération");
-    } finally {
-      setUrlsLoading(false);
+    } else {
+      await assignUrlLimitUser(assignUrlId!, userId, data);
+      showSuccess('Utilisateur assigné avec succès !');
     }
-  };
+    await fetchUrls();
+    setShowAssignForm(false);
+    setAssignUrlId(null);
+    setEditingUser(null);
+  } catch (err: unknown) {
+    const error = err as Error;
+    setUrlsError(error.message || "Erreur lors de l'opération");
+  } finally {
+    setUrlsLoading(false);
+  }
+};
 
   const handleCreate = async (data: any) => {
     try {
-      // 1. Créer l'URL
       const newUrl = await createUrlLimit({ url: data.url });
-      setShowWizard(false);
-
-      // 2. Assigner les quotas à chaque utilisateur sélectionné
+      if (newUrl?.status?.code !== 200) {
+        setUrlsError(newUrl?.status?.description ?? 'Erreur lors de la création');
+        }else{
+          setShowWizard(false);
       if (newUrl && data.users && data.users.length > 0) {
         await Promise.all(
           data.users.map((user: any) =>
@@ -195,9 +204,9 @@ export default function LimitesPage() {
           )
         );
       }
-
       await fetchUrls();
       showSuccess('URL déclarée et utilisateurs assignés avec succès !');
+     }
     } catch (err: unknown) {
       const error = err as Error;
       setUrlsError(error?.message || 'Erreur lors de la création');
@@ -212,7 +221,11 @@ export default function LimitesPage() {
       isDangerous: true,
       onConfirm: async () => {
         try {
-          await deleteUrlLimit(id);
+          const response = await deleteUrlLimit(id);
+          if(response?.status?.code !== 200){
+            setUrlsError(response?.status?.description ?? 'Erreur lors de la suppression');
+          }else {
+
           if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
             setUrls(prev => prev.filter(u => String(u.id) !== id));
             setUrlsTotal(prev => prev - 1);
@@ -221,6 +234,8 @@ export default function LimitesPage() {
           }
           setUrlsDialogOpen(false);
           showSuccess('URL supprimée avec succès !');
+
+            }
         } catch (err: unknown) {
           const error = err as Error;
           setUrlsError(error?.message || 'Erreur lors de la suppression');
@@ -416,8 +431,8 @@ export default function LimitesPage() {
                       limit={rateLimitsLimit}
                       onPageChange={setRateLimitsPage}
                       onLimitChange={(newLimit) => {
-                        setRateLimitsLimit(newLimit);
-                        setRateLimitsPage(1);
+                      setRateLimitsLimit(newLimit);
+                      setRateLimitsPage(1);
                       }}
                     />
                   </div>
@@ -450,7 +465,6 @@ export default function LimitesPage() {
                 </button>
               </div>
             )}
-
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => fetchUrls()}
@@ -521,3 +535,4 @@ export default function LimitesPage() {
     </>
   );
 }
+ 

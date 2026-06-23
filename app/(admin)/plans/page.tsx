@@ -32,7 +32,6 @@ export default function PlansPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAssignForm, setShowAssignForm] = useState(false);
   const [assigningPlan, setAssigningPlan] = useState<Plan | null>(null);
-
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogConfig, setDialogConfig] = useState<{
     title: string;
@@ -74,11 +73,17 @@ export default function PlansPage() {
 
   const handleCreate = async (data: CreatePlanRequest) => {
     try {
-      await createPlan(data);
+      const response = await createPlan(data);
+      
+      if (response?.status?.code !== 200) {
+        setError(response?.status?.description ?? 'Erreur lors de la création');
+      } else{ 
       setSuccessMessage('Le plan tarifaire a été créé avec succès !');
       setShowForm(false);
       setTimeout(() => setSuccessMessage(''), 3000);
       await fetchPlans({ page: 1 });
+      }
+      
     } catch (err: unknown) {
       const error = err as Error;
       setError(error?.message || 'Erreur lors de la création');
@@ -88,13 +93,17 @@ export default function PlansPage() {
   const handleUpdate = async (data: UpdatePlanRequest) => {
     try {
       if (editingPlan) {
-        await updatePlan(String(editingPlan.id), data);
+        const response = await updatePlan(String(editingPlan.id), data);
+        if (response?.status?.code !== 200) {
+          setError(response?.status?.description ?? 'Erreur lors de la modification');
+        }else{
         setSuccessMessage('Le plan tarifaire a été modifié avec succès !');
         setEditingPlan(null);
         setShowForm(false);
         setTimeout(() => setSuccessMessage(''), 3000);
         await fetchPlans();
       }
+        }
     } catch (err: unknown) {
       const error = err as Error;
       setError(error?.message || 'Erreur lors de la modification');
@@ -103,11 +112,15 @@ export default function PlansPage() {
 
   const handleAssign = async (userIds: string[], data: AssignPlanRequest) => {
     try {
-      await Promise.all(userIds.map(userId => assignPlan(userId, data)));
+      const response = await Promise.all(userIds.map(userId => assignPlan(userId, data)));
+      if (response?.status?.code !== 200) {
+        setError(response?.status?.description ?? 'Erreur lors de l\'affectation');
+      } else {
       setSuccessMessage(`Plan "${assigningPlan?.displayName}" affecté avec succès !`);
       setShowAssignForm(false);
       setAssigningPlan(null);
       setTimeout(() => setSuccessMessage(''), 3000);
+      }
     } catch (err: unknown) {
       const error = err as Error;
       setError(error?.message || "Erreur lors de l'affectation");
@@ -131,6 +144,7 @@ export default function PlansPage() {
         onConfirm: async () => {
           try {
             const nvoStatut = !plan.active;
+
             const payload: UpdatePlanRequest = {
               name: plan.name,
               displayName: plan.displayName,
@@ -140,7 +154,10 @@ export default function PlansPage() {
               description: plan.description || '',
           
             };
-            await updatePlan(String(plan.id), payload);
+          const response =  await updatePlan(String(plan.id), payload);
+          if (response?.status?.code !== 200) {
+            if (response?.status?.description??' Erreur lors de la modification');
+             } else { 
             setPlans(prev => prev.map(p => p.id === plan.id ? { ...p, active: nvoStatut } : p));
             setDialogOpen(false);
             setSuccessMessage(`Le plan "${plan.displayName}" a été ${nvoStatut ? 'activé' : 'désactivé'} avec succès !`);
@@ -148,11 +165,12 @@ export default function PlansPage() {
             if (process.env.NEXT_PUBLIC_USE_MOCK !== 'true') {
               await fetchPlans();
             }
+          }
           } catch (err: unknown) {
-  let apiMessage: string | undefined;
+     let apiMessage: string | undefined;
 
      if (isAxiosError(err)) {
-  apiMessage = err.response?.data?.message || err.message;
+      apiMessage = err.response?.data?.message || err.message;
     } else if (err instanceof Error) {
         apiMessage = err.message;
     }
@@ -233,7 +251,6 @@ export default function PlansPage() {
       </div>
     );
   }
-
   return (
     <>
       {dialogConfig && (

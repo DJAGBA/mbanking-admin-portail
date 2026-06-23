@@ -19,16 +19,14 @@ export const getUsers = async (
   return response.data;
 };
 // GET /users/:id - Details
-export const getUserById = async (id: string) => {
+export const getUserById = async (id: string): Promise<APIResponse<UserData>> => {
   const response = await axios.get<GetUserResponse>(`/users/${id}`);
-  return response.data.data;
+  return response.data as APIResponse<UserData>;
 };
 // POST /users - Create
 export const createUser = async (
-  userId: string,
   data: CreateUserRequest | UpdateUserRequest
 ): Promise<APIResponse<UserData>> => {
-  
   const response = await axios.post<GetUserResponse>('/users', data);
   return response.data as APIResponse<UserData>;
 };
@@ -42,27 +40,27 @@ export const updateUser = async (
   return res.data as APIResponse<UserData> ;
 };
 // PATCH /users/:id/activate - Activate
-export const activateUser = async (id: string): Promise<UserData> => {
+export const activateUser = async (id: string): Promise<APIResponse<UserData>> => {
   const response = await axios.patch(`/users/${id}/activate`);
-  return response.data.data!;
+  return response.data as APIResponse<UserData>;
 };
 // PATCH /users/:id/deactivate - Deactivate
-export const deactivateUser = async (id: string): Promise<UserData> => {
+export const deactivateUser = async (id: string): Promise<APIResponse<UserData>> => {
   const response = await axios.patch(`/users/${id}/deactivate`);
-  return response.data.data!;
+  return response.data as APIResponse<UserData>;
 };
 // POST /users/:id/reset-password - Reset password
-export const resetPassword = async (id: string) => {
+export const resetPassword = async (id: string): Promise<APIResponse<UserData>> => {
   const response = await axios.post(`/users/${id}/reset-password`);
-  return response.data;
+  return response.data as APIResponse<UserData>;
 };
 // POST /users/:id/revoke-token - Revoke token
-export const revokeTokens = async (id: string) => {
+export const revokeTokens = async (id: string): Promise<APIResponse<UserData>> => {
   const response = await axios.post(`/users/${id}/revoke-token`);
-  return response.data;
+  return response.data as APIResponse<UserData>;
 };
 // DELETE /users/:id - Delete
-export const deleteUser = async (id: string) => {
+export const deleteUser = async (id: string): Promise<APIResponse<UserData>> => {
   const response = await axios.delete(`/users/${id}`);
-  return response.data;
+  return response.data as APIResponse<UserData>;
 };

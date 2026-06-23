@@ -35,6 +35,11 @@ export default function UsersPage() {
     onCancel?: () => void;
   } | null>(null);
 
+  const showSuccess = (message: string) => {
+    setSuccessMessage(message);
+    setTimeout(() => setSuccessMessage(''), 3000);
+  };
+
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -59,30 +64,14 @@ export default function UsersPage() {
 
   const handleCreate = async (data: CreateUserRequest | UpdateUserRequest) => {
     try {
-      setError('');
-      const newUser = await createUser(data);
-      
-      if(newUser?.status?.code !== 200) {
-        setError(newUser.status?.description ?? 'Erreur lors de la création');
-      }else { setSuccessMessage("L'utilisateur a été créé avec succès !");
-      setShowForm(false);
-      setTimeout(() => setSuccessMessage(''), 3000);
-      if (process.env.NEXT_PUBLIC_USE_MOCK === 'true' && newUser) {
-        const userWithDefaults: UserData = {
-          ...newUser,
-          id: `temp_${Date.now()}`,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        setUsers(prev => [userWithDefaults, ...prev]);
-        setTotal(prev => prev + 1);
-        } else {
+      const response = await createUser(data);
+      if (response?.status?.code !== 200) {
+        showSuccess("L'utilisateur a été créé avec succès !");
+        setShowForm(false);
         await fetchUsers();
+      } else {
+        setError(response?.status?.description ?? 'Erreur lors de la création');
       }
-
-       }
-      
-     
     } catch (err: unknown) {
       const error = err as Error;
       setError(error?.message || 'Erreur lors de la création');
@@ -94,17 +83,15 @@ export default function UsersPage() {
       if (editingUser) {
         const response = await updateUser(editingUser.id, data);
 
-        if(response?.status?.code !== 200) {
-          setError(response.status?.description ?? 'Erreur lors du chargement');
+        if (response?.status?.code !== 200) {
+          setError(response?.status?.description ?? 'Erreur lors de la mise à jour');
         } else {
-          setSuccessMessage("L'utilisateur a été mis à jour avec succès !");
+          showSuccess("L'utilisateur a été mis à jour avec succès !");
           setEditingUser(null);
           setError('');
           setShowForm(false);
-          setTimeout(() => setSuccessMessage(''), 3000);
           await fetchUsers();
-        }
-
+        }   
       }
     } catch (err: unknown) {
       const error = err as Error;
@@ -124,11 +111,15 @@ export default function UsersPage() {
           isDangerous: true,
           onConfirm: async () => {
             try {
-              await deleteUser(id);
-              setDialogOpen(false);
-              setSuccessMessage("L'utilisateur a été supprimé avec succès !");
-              setTimeout(() => setSuccessMessage(''), 3000);
-              await fetchUsers();
+              const response = await deleteUser(id);
+              if (response?.status?.code !== 200) {
+                setError(response?.status?.description ?? 'Erreur lors de la suppression');
+                setDialogOpen(false);
+              } else {
+                setDialogOpen(false);
+                showSuccess("L'utilisateur a été supprimé avec succès !");
+                await fetchUsers();
+              }
             } catch (err: unknown) {
               const error = err as Error;
               setError(error?.message || "Erreur lors de la suppression");
@@ -154,13 +145,17 @@ export default function UsersPage() {
           message: "Voulez-vous vraiment activer cet utilisateur ?",
           onConfirm: async () => {
             try {
-              await activateUser(id);
-              setDialogOpen(false);
-              setSuccessMessage("L'utilisateur a été activé avec succès !");
-              setTimeout(() => setSuccessMessage(''), 3000);
-              setUsers(prev => prev.map(u => String(u.id) === String(id) ? { ...u, active: true } : u));
-              if (process.env.NEXT_PUBLIC_USE_MOCK !== 'true') {
-                await fetchUsers();
+              const response = await activateUser(id);
+              if (response?.status?.code !== 200) {
+                setError(response?.status?.description ?? "Erreur lors de l'activation");
+                setDialogOpen(false);
+              } else {
+                setDialogOpen(false);
+                showSuccess("L'utilisateur a été activé avec succès !");
+                setUsers(prev => prev.map(u => String(u.id) === String(id) ? { ...u, active: true } : u));
+                if (process.env.NEXT_PUBLIC_USE_MOCK !== 'true') {
+                  await fetchUsers();
+                }
               }
             } catch (err: unknown) {
               setError((err as Error).message || "Erreur lors de l'activation");
@@ -188,13 +183,17 @@ export default function UsersPage() {
           isDangerous: true,
           onConfirm: async () => {
             try {
-              await deactivateUser(id);
-              setDialogOpen(false);
-              setSuccessMessage("L'utilisateur a été désactivé avec succès !");
-              setTimeout(() => setSuccessMessage(''), 3000);
-              setUsers(prev => prev.map(u => String(u.id) === String(id) ? { ...u, active: false } : u));
-              if (process.env.NEXT_PUBLIC_USE_MOCK !== 'true') {
-                await fetchUsers();
+              const response = await deactivateUser(id);
+              if (response?.status?.code !== 200) {
+                setError(response?.status?.description ?? "Erreur lors de la désactivation");
+                setDialogOpen(false);
+              } else {
+                setDialogOpen(false);
+                showSuccess("L'utilisateur a été désactivé avec succès !");
+                setUsers(prev => prev.map(u => String(u.id) === String(id) ? { ...u, active: false } : u));
+                if (process.env.NEXT_PUBLIC_USE_MOCK !== 'true') {
+                  await fetchUsers();
+                }
               }
             } catch (err: unknown) {
               setError((err as Error).message || "Erreur lors de la désactivation");
@@ -220,10 +219,14 @@ export default function UsersPage() {
           message: "Êtes-vous vraiment sûr de vouloir réinitialiser le mot de passe ?",
           onConfirm: async () => {
             try {
-              await resetPassword(id);
-              setDialogOpen(false);
-              setSuccessMessage("Le mot de passe a bien été réinitialisé. Un email a été envoyé.");
-              setTimeout(() => setSuccessMessage(''), 3000);
+              const response = await resetPassword(id);
+              if (response?.status?.code !== 200) {
+                setError(response?.status?.description ?? 'Erreur lors de la réinitialisation');
+                setDialogOpen(false);
+              } else {
+                setDialogOpen(false);
+                showSuccess("Le mot de passe a bien été réinitialisé. Un email a été envoyé.");
+              }
             } catch (err: unknown) {
               const error = err as Error;
               setError(error?.message || 'Erreur lors de la réinitialisation');
@@ -252,11 +255,15 @@ export default function UsersPage() {
           isDangerous: true,
           onConfirm: async () => {
             try {
-              await revokeTokens(id);
-              setDialogOpen(false);
-              setSuccessMessage("Les jetons de connexion (tokens) ont été révoqués avec succès !");
-              setTimeout(() => setSuccessMessage(''), 3000);
-              await fetchUsers();
+              const response = await revokeTokens(id);
+              if (response?.status?.code !== 200) {
+                setError(response?.status?.description ?? "Erreur lors de la révocation");
+                setDialogOpen(false);
+              } else {
+                setDialogOpen(false);
+                showSuccess("Les jetons de connexion (tokens) ont été révoqués avec succès !");
+                await fetchUsers();
+              }
             } catch (err: unknown) {
               const error = err as Error;
               setError(error?.message || "Erreur lors de la révocation");
@@ -289,7 +296,7 @@ export default function UsersPage() {
               users={users}
               onEdit={(user: UserData) => {
                 setEditingUser(user);
-                setError('')
+                setError('');
                 setShowForm(true);
               }}
               onActivate={handleActivate}
@@ -334,7 +341,7 @@ export default function UsersPage() {
         <button
           onClick={() => {
             setEditingUser(null);
-            setError('')
+            setError('');
             setShowForm(true);
           }}
           className="inline-flex items-center gap-2 px-4 py-2.5 text-white font-medium rounded-lg transition-colors bg-primary hover:bg-primary"
@@ -396,7 +403,7 @@ export default function UsersPage() {
         {showForm && (
           <UserForm
             user={editingUser}
-            onSubmit={async ( formData) => {
+            onSubmit={async (formData) => {
               if (editingUser) {
                 await handleUpdate(formData as UpdateUserRequest);
               } else {
@@ -404,7 +411,7 @@ export default function UsersPage() {
               }
             }}
             onCancel={() => {
-              setError('')
+              setError('');
               setShowForm(false);
               setEditingUser(null);
             }}
@@ -438,7 +445,7 @@ export default function UsersPage() {
             <button
               onClick={() => {
                 setEditingUser(null);
-                setError('')
+                setError('');
                 setShowForm(true);
               }}
               className="inline-flex items-center gap-2 px-4 py-2.5 text-white font-medium rounded-lg transition-colors whitespace-nowrap bg-primary hover:bg-primary"

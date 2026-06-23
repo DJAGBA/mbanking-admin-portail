@@ -39,7 +39,6 @@ export function BankForm({ bank, onSubmit, onCancel }: BankFormProps) {
     miniStatementTreshold: bank?.miniStatementTreshold?.toString() || '',
     otpValidity: bank?.otpValidity?.toString() || '',
   });
-
   // Catalog of available services to select when creating a new bank, with mapping to form fields for code, option digit, position, and menu level
   const serviceCatalog = [
     { key: 'bank-to-wallet', label: 'Bank to Wallet' },
@@ -295,20 +294,20 @@ export function BankForm({ bank, onSubmit, onCancel }: BankFormProps) {
                 />
               </div>
              <div>
-  <label className="block text-sm font-semibold text-gray-900 mb-2">
-    Version
-  </label>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Version
+        </label>
 
   <select
     name="version"
     value={formData.version}
     onChange={handleChange}
     className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-  >
-    <option value="v1">v1</option>
-    <option value="v2">v2</option>
-  </select>
-</div>
+     >
+         <option value="v1">v1</option>
+        <option value="v2">v2</option>
+          </select>
+           </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">Format compte</label>
                 <input

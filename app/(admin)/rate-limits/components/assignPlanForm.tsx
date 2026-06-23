@@ -72,7 +72,7 @@ export function AssignPlanForm({ initialPlanName, onSubmit, onCancel }: AssignPl
 // Toggle user selection in the list when clicked
   const toggleUser = (userId: string) => {
     setSelectedUserIds(prev =>
-      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
     );
   };
 // Handle navigation to the next step, with validation for user selection in step 1 and expiration date in step 2
