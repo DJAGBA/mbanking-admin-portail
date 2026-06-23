@@ -17,9 +17,9 @@ interface UseUsersReturn {
   pagination: PaginationState;
   fetchUsers: (page?: number, limit?: number, search?: string, active?: boolean) => Promise<void>;
   createUser: (data: CreateUserRequest) => Promise<UserData>;
-  updateUser: (id: string, data: UpdateUserRequest) => Promise<UserData>;
-  activateUser: (id: string) => Promise<UserData>;
-  deactivateUser: (id: string) => Promise<UserData>;
+  updateUser: (id: string, data: UpdateUserRequest) => Promise<UserData | null>;
+  activateUser: (id: string) => Promise<UserData | null>;
+  deactivateUser: (id: string) => Promise<UserData | null>;
   resetPassword: (id: string) => Promise<unknown>;
   deleteUser: (id: string) => Promise<void>;
   revokeToken: (userId: string) => Promise<unknown>;
@@ -82,35 +82,45 @@ async function withMutation<T>(
     setIsMutating(false);
   }
 }
-  const handleCreateUser = useCallback(
-    async (userData: CreateUserRequest): Promise<UserData> => {
-      const newUser = await withMutation(() => createUser(userData), setIsMutating, setError);
-      // Re-fetch to keep data up to date (pagination stays consistent)
-      return newUser;
-    },
-    [setIsMutating, setError]
-  );
+ const handleCreateUser = useCallback(
+  async (userData: CreateUserRequest): Promise<UserData> => {
+    const response = await withMutation(() => createUser(userData), setIsMutating, setError);
+
+    if (response?.status?.code === 2000 && response?.data) {
+      return response.data;
+    } else {
+      throw new Error(response?.status?.description ?? "Erreur lors de la création de l’utilisateur");
+    }
+  },
+  [setIsMutating, setError]
+);
+
   const handleUpdateUser = useCallback(
-    async (id: string, userData: UpdateUserRequest): Promise<UserData> => {
-      const updatedUser = await withMutation(() => updateUser(id, userData), setIsMutating, setError);
-      setUsers((prev) => prev.map((u) => (u.id === id ? updatedUser : u)));
-      return updatedUser;
+    async (id: string, userData: UpdateUserRequest): Promise<UserData | null> => {
+      const response = await withMutation(() => updateUser(id, userData), setIsMutating, setError);
+
+      fetchUsers(pagination.page, pagination.limit); // Refresh the list after update
+
+      // setUsers((prev) => prev.map((u) => (u.id === id ? response.data : u)));
+      return response.data ?? null
     },
     [setIsMutating, setError]
   );
   const handleActivateUser = useCallback(
-    async (id: string): Promise<UserData> => {
+    async (id: string): Promise<UserData | null> => {
       const updatedUser = await withMutation(() => activateUser(id), setIsMutating, setError);
-      setUsers((prev) => prev.map((u) => (u.id === id ? updatedUser : u)));
-      return updatedUser;
+      fetchUsers(pagination.page, pagination.limit); // Refresh the list after activation
+      // setUsers((prev) => prev.map((u) => (u.id === id ? updatedUser : u)));
+      return updatedUser.data ?? null;
     },
     [setIsMutating, setError]
   );
   const handleDeactivateUser = useCallback(
-    async (id: string): Promise<UserData> => {
+    async (id: string): Promise<UserData | null> => {
       const updatedUser = await withMutation(() => deactivateUser(id), setIsMutating, setError);
-      setUsers((prev) => prev.map((u) => (u.id === id ? updatedUser : u)));
-      return updatedUser;
+      fetchUsers(pagination.page, pagination.limit); // Refresh the list after deactivation
+      // setUsers((prev) => prev.map((u) => (u.id === id ? updatedUser : u)));
+      return updatedUser.data ?? null;
     },
     [setIsMutating, setError]
   );

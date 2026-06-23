@@ -34,7 +34,7 @@ export default function UrlLimitDetailPage() {
     try {
       setLoading(true);
       const response = await getUrlLimitById(urlId);
-      setUrlLimit(response);
+      setUrlLimit(response.data ?? null);
     } catch (err: unknown) {
       const error = err as Error;
       setError(error?.message || 'Erreur lors du chargement');

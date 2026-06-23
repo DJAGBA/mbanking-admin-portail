@@ -79,7 +79,7 @@ export function usePlans(): UsePlansReturn {
       setError(null);
       try {
         const plan = await getPlanById(id);
-        return plan;
+        return plan.data ?? null;
       } catch (err: unknown) {
         const error = err as Error;
         setError(error?.message || 'Plan not found');
@@ -92,20 +92,34 @@ export function usePlans(): UsePlansReturn {
   );
   // Create
   const handleCreatePlan = useCallback(
-    async (data: CreatePlanRequest): Promise<Plan> => {
-      return withMutation(() => createPlan(data));
-    },
-    [withMutation]
-  );
+  async (data: CreatePlanRequest): Promise<Plan> => {
+    const response = await withMutation(() => createPlan(data));
+
+    if (response?.status?.code === 2000 && response?.data) {
+      return response.data;
+    } else {
+      throw new Error(response?.status?.description ?? "Erreur lors de la création du plan");
+    }
+  },
+  [withMutation]
+);
+
   // Update
-  const handleUpdatePlan = useCallback(
-    async (id: string, data: UpdatePlanRequest): Promise<Plan> => {
-      const updated = await withMutation(() => updatePlan(id, data));
+const handleUpdatePlan = useCallback(
+  async (id: string, data: UpdatePlanRequest): Promise<Plan> => {
+    const response = await withMutation(() => updatePlan(id, data));
+
+    if (response?.status?.code === 2000 && response?.data) {
+      const updated = response.data;
       setPlans((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
       return updated;
-    },
-    [withMutation]
-  );
+    } else {
+      throw new Error(response?.status?.description ?? "Erreur lors de la mise à jour du plan");
+    }
+  },
+  [withMutation, setPlans]
+);
+
   // Select
   const selectPlan = useCallback((plan: Plan | null) => {
     setSelectedPlan(plan);

@@ -29,17 +29,17 @@ export default function UserDetailPage() {
       try {
         setLoading(true);
         const response = await getUserById(userId);
-        setUser(response);
+        setUser(  response.data ?? null);
         setFormData({
-          name: response?.name || '',
-          email: response?.email || '',
-          version: response?.version || '',
-          operation: response?.operation || '',
-          callbackUrl: response?.callbackUrl || '',
-          corporateMomoAccount: response?.corporateMomoAccount || '',
-          corporateMomoCode: response?.corporateMomoCode || '',
-          momoAlias: response?.momoAlias || '',
-          momoCode: response?.momoCode || '',
+          name: response?.data?.name || '',
+          email: response?.data?.email || '',
+          version: response?.data?.version || '',
+          operation: response?.data?.operation || '',
+          callbackUrl: response?.data?.callbackUrl || '',
+          corporateMomoAccount: response?.data?.corporateMomoAccount || '',
+          corporateMomoCode: response?.data?.corporateMomoCode || '',
+          momoAlias: response?.data?.momoAlias || '',
+          momoCode: response?.data?.momoCode || '',
         });
       } catch (err: unknown) {
         const error = err as Error;
@@ -60,17 +60,17 @@ export default function UserDetailPage() {
     try {
       setError('');
       const updated = await updateUser(userId, formData);
-      setUser(updated);
+      setUser(updated.data ?? null);
       setFormData({
-        name: updated?.name || '',
-        email: updated?.email || '',
-        version: updated?.version || '',
-        operation: updated?.operation || '',
-        callbackUrl: updated?.callbackUrl || '',
-        corporateMomoAccount: updated?.corporateMomoAccount || '',
-        corporateMomoCode: updated?.corporateMomoCode || '',
-        momoAlias: updated?.momoAlias || '',
-        momoCode: updated?.momoCode || '',
+        name: updated?.data?.name || '',
+        email: updated?.data?.email || '',
+        version: updated?.data?.version || '',
+        operation: updated?.data?.operation || '',
+        callbackUrl: updated?.data?.callbackUrl || '',
+        corporateMomoAccount: updated?.data?.corporateMomoAccount || '',
+        corporateMomoCode: updated?.data?.corporateMomoCode || '',
+        momoAlias: updated?.data?.momoAlias || '',
+        momoCode: updated?.data?.momoCode || '',
       });
       setIsEditing(false);
       setError('');
@@ -88,7 +88,7 @@ export default function UserDetailPage() {
         try {
           await activateUser(userId);
           const updated = await getUserById(userId);
-          setUser(updated);
+          setUser(updated.data ?? null);
           setDialogOpen(false);
         } catch (err: unknown) {
           const error = err as Error;
@@ -110,7 +110,7 @@ export default function UserDetailPage() {
         try {
           await deactivateUser(userId);
           const updated = await getUserById(userId);
-          setUser(updated);
+          setUser(updated.data ?? null);
           setDialogOpen(false);
         } catch (err: unknown) {
           const error = err as Error;

@@ -1,12 +1,28 @@
-export type UrlLimit = {
-  id: number
-  url: string
-  createdAt?: string
-  updatedAt?: string
+export interface URLLimitUserDto {
+    items:      UrlLimitUser[];
+    pagination: Pagination;
 }
+
+export interface UrlLimit {
+    id:        number;
+    url:       string;
+    active:    boolean;
+    createdAt: Date;
+}
+
+export interface Pagination {
+    page:       number;
+    limit:      number;
+    total:      number;
+    totalPages: number;
+    hasNext:    boolean;
+    hasPrev:    boolean;
+}
+
 
 export type UrlLimitUser = {
   id: number
+  url:       string;
   userId: number
   username: string
   email: string

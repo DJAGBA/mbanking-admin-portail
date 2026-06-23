@@ -188,7 +188,7 @@ const handleUpdate = async (data: UpdateBankRequest) => {
       return (
         <div className="py-16 flex flex-col items-center justify-center">
           <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-            <Search className="w-5 h-5 text-gray-400" />
+            <Search className="w-5 h-5 text-gray-400"/>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucun résultat</h3>
           <p className="text-gray-500 mb-4">Aucune banque ne correspond à votre recherche.</p>
@@ -288,14 +288,14 @@ const handleUpdate = async (data: UpdateBankRequest) => {
           </div>
           <div className="flex justify-end gap-3">
            <button
-  onClick={() => fetchBanks()}
-  disabled={loading}
-  className="inline-flex items-center gap-2 px-4 py-2.5 font-medium rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-  style={{ backgroundColor: '#FFD100', color: '#00377D' }}
->
-  <RotateCw className="w-4 h-4" />
-  Actualiser
-</button>
+           onClick={() => fetchBanks()}
+           disabled={loading}
+           className="inline-flex items-center gap-2 px-4 py-2.5 font-medium rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+           style={{ backgroundColor: '#FFD100', color: '#00377D' }}
+            >
+         <RotateCw className="w-4 h-4" />
+             Actualiser
+           </button>
             <button
               onClick={() => {
                 setEditingBank(null);

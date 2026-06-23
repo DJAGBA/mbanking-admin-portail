@@ -74,7 +74,7 @@ export default function PlansPage() {
   const handleCreate = async (data: CreatePlanRequest) => {
     try {
       const response = await createPlan(data);
-      
+       
       if (response?.status?.code !== 200) {
         setError(response?.status?.description ?? 'Erreur lors de la création');
       } else{ 
@@ -113,8 +113,8 @@ export default function PlansPage() {
   const handleAssign = async (userIds: string[], data: AssignPlanRequest) => {
     try {
       const response = await Promise.all(userIds.map(userId => assignPlan(userId, data)));
-      if (response?.status?.code !== 200) {
-        setError(response?.status?.description ?? 'Erreur lors de l\'affectation');
+      if (response.some(res => res?.status?.code !== 200)) {
+        setError(response?.find(res => res?.status?.code !== 200)?.status?.description ?? 'Erreur lors de l\'affectation');
       } else {
       setSuccessMessage(`Plan "${assigningPlan?.displayName}" affecté avec succès !`);
       setShowAssignForm(false);
@@ -156,7 +156,8 @@ export default function PlansPage() {
             };
           const response =  await updatePlan(String(plan.id), payload);
           if (response?.status?.code !== 200) {
-            if (response?.status?.description??' Erreur lors de la modification');
+              setError(response?.status?.description ?? 'Erreur lors de la modification');
+            
              } else { 
             setPlans(prev => prev.map(p => p.id === plan.id ? { ...p, active: nvoStatut } : p));
             setDialogOpen(false);

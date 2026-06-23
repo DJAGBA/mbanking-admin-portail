@@ -35,7 +35,7 @@ export default function RateLimitDetailModal({ userId, onClose }: RateLimitDetai
     try {
       setLoading(true);
       const data = await getRateLimitByUser(userId);
-      setRateLimit(data);
+      setRateLimit(data.data);
     } catch (err: unknown) {
       const error = err as Error;
       setError(error?.message || 'Erreur lors du chargement');

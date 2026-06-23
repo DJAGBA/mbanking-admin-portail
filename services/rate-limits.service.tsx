@@ -1,5 +1,6 @@
 import axios from '@/lib/axios';
-import type {AssignPlanRequest,UpdateCustomLimitsRequest,ListRateLimitsResponse,GetRateLimitResponse,RateLimitHistoryResponse,} from '@/src/types/rate-limit';
+import { APIResponse } from '@/src/types/ApiResponse';
+import type {AssignPlanRequest,UpdateCustomLimitsRequest,ListRateLimitsResponse,GetRateLimitResponse,RateLimitHistoryResponse, RateLimit,} from '@/src/types/rate-limit';
 // GET /rate-limits
 export const getRateLimits = async (
   page: number = 1,
@@ -18,29 +19,29 @@ export const getRateLimits = async (
   return response.data;
 };
 // GET /rate-limits/users/:userId
-export const getRateLimitByUser = async (userId: string) => {
-  const response = await axios.get<GetRateLimitResponse>(`/rate-limits/users/${userId}`);
-  return response.data.data;
+export const getRateLimitByUser = async (userId: string): Promise<GetRateLimitResponse> => {
+  const response = await axios.get(`/rate-limits/users/${userId}`);
+  return response.data ;
 };
 // POST /rate-limits/users/:userId/assign
-export const assignPlan = async (userId: string, data: AssignPlanRequest) => {
-  const response = await axios.post<GetRateLimitResponse>(`/rate-limits/users/${userId}/assign`, data);
-  return response.data.data;
+export const assignPlan = async (userId: string, data: AssignPlanRequest): Promise<GetRateLimitResponse> => {
+  const response = await axios.post(`/rate-limits/users/${userId}/assign`, data);
+  return response.data ;
 };
 // PATCH /rate-limits/users/:userId/custom-limits
 export const updateCustomLimits = async (
   userId: string,
   data: UpdateCustomLimitsRequest
-) => {
-  const response = await axios.patch<GetRateLimitResponse>(
+): Promise<GetRateLimitResponse> => {
+  const response = await axios.patch(
     `/rate-limits/users/${userId}/custom-limits`, data
   );
-  return response.data.data;
+  return response.data as GetRateLimitResponse ;
 };
 // DELETE /rate-limits/users/:userId
-export const deactivateUserPlan = async (userId: string) => {
+export const deactivateUserPlan = async (userId: string): Promise<APIResponse<GetRateLimitResponse>> => {
   const response = await axios.delete(`/rate-limits/users/${userId}`);
-  return response.data;
+  return response.data as APIResponse<GetRateLimitResponse>;
 };
 // GET /rate-limits/users/:userId/history
 export const getRateLimitHistory = async (

@@ -45,7 +45,7 @@ export default function BankDetailPage() {
     try {
       setLoading(true);
       const response = await getBankById(bankId);
-      setBank(response);
+      setBank(response.data);
     } catch (err: unknown) {
       const error = err as Error;
       setError(error?.message || 'Erreur lors du chargement');
@@ -96,9 +96,9 @@ export default function BankDetailPage() {
     const updatedBank = await addService(bankId, data);
     setShowServiceForm(false);
     
-    if (process.env.NEXT_PUBLIC_USE_MOCK === 'true' && updatedBank) {
+    if (process.env.NEXT_PUBLIC_USE_MOCK === 'true' && updatedBank.status.code === 200) {
       // Puisque addService renvoie la banque, on remplace directement l'état !
-      setBank(updatedBank as Bank); 
+      setBank(updatedBank.data as Bank); 
     } else {
       await fetchBank();
     }

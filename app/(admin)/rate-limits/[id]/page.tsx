@@ -26,7 +26,7 @@ export default function RateLimitDetailPage() {
     try {
       setLoading(true);
       const response = await getRateLimitByUser(userId);
-      setRateLimit(response);
+      setRateLimit(response.data);
     } catch (err: unknown) {
       setError((err as Error)?.message || 'Erreur lors du chargement');
     } finally {

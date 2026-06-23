@@ -10,7 +10,6 @@ import { UserForm } from './components/userForm';
 import { Pagination } from '@/components/ui/pagination';
 import { Plus, RotateCw, AlertCircle, X } from 'lucide-react';
 import { ConfirmDialog } from '@/components/ui/confirmDialog';
-
 export default function UsersPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);

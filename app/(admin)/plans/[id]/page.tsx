@@ -19,13 +19,13 @@ export default function PlanDetailPage() {
       try {
         setLoading(true);
         const response = await getPlanById(planId);
-        setPlan(response);
+        setPlan(response.data ?? null);
         setFormData({
-          displayName: response?.displayName || '',
-          pointsPerMinute: response?.pointsPerMinute || 0,
-          pointsPerHour: response?.pointsPerHour || 0,
-          pointsPerDay: response?.pointsPerDay || undefined,
-          description: response?.description || '',
+          displayName: response.data?.displayName || '',
+          pointsPerMinute: response.data?.pointsPerMinute || 0,
+          pointsPerHour: response.data?.pointsPerHour || 0,
+          pointsPerDay: response.data?.pointsPerDay || undefined,
+          description: response.data?.description || '',
         });
       } catch (err: unknown){
         const error = err as Error;
@@ -53,7 +53,7 @@ export default function PlanDetailPage() {
       setError('');
       await updatePlan(planId, formData);
       const updated = await getPlanById(planId);
-      setPlan(updated);
+      setPlan(updated.data ?? null);
       setIsEditing(false);
       toast.success('Plan modifié avec succès !');
     } catch (err: unknown) {

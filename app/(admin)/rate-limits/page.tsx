@@ -40,7 +40,6 @@ export default function LimitesPage() {
     isDangerous?: boolean;
     onConfirm: () => void;
   } | null>(null);
-
   const [urls, setUrls] = useState<UrlLimit[]>([]);
   const [urlsLoading, setUrlsLoading] = useState(false);
   const [urlsError, setUrlsError] = useState('');
@@ -62,8 +61,8 @@ export default function LimitesPage() {
   const [editingUser, setEditingUser] = useState<any>(null);
 
   const showSuccess = (message: string) => {
-    setSuccessMessage(message);
-    setTimeout(() => setSuccessMessage(''), 3000);
+  setSuccessMessage(message);
+  setTimeout(() => setSuccessMessage(''), 3000);
   };
   const fetchRateLimits = useCallback(async () => {
     setRateLimitsLoading(true);
@@ -131,7 +130,6 @@ export default function LimitesPage() {
       setShowCustomForm(true);
     }
   };
-
   const fetchUrls = useCallback(async () => {
     setUrlsLoading(true);
     setUrlsError('');
@@ -153,13 +151,11 @@ export default function LimitesPage() {
       setUrlsLoading(false);
     }
   }, [urlsPage, urlsLimit]);
-
   const handleAssignUser = (urlId: string) => {
     setAssignUrlId(urlId);
     setEditingUser(null);
     setShowAssignForm(true);
   };
-
   const handleSubmitAssignUser = async (userId: string, data: any) => {
   try {
     setUrlsLoading(true);
@@ -185,7 +181,6 @@ export default function LimitesPage() {
     setUrlsLoading(false);
   }
 };
-
   const handleCreate = async (data: any) => {
     try {
       const newUrl = await createUrlLimit({ url: data.url });
@@ -196,7 +191,7 @@ export default function LimitesPage() {
       if (newUrl && data.users && data.users.length > 0) {
         await Promise.all(
           data.users.map((user: any) =>
-            assignUrlLimitUser(String(newUrl.id), String(user.id), {
+            assignUrlLimitUser(String(newUrl?.data?.id), String(user.id), {
               pointsPerMinute: data.pointsPerMinute,
               pointsPerHour: data.pointsPerHour,
               ...(data.pointsPerDay && { pointsPerDay: data.pointsPerDay }),
@@ -212,7 +207,6 @@ export default function LimitesPage() {
       setUrlsError(error?.message || 'Erreur lors de la création');
     }
   };
-
   const handleDelete = (id: string) => {
     setUrlsDialogConfig({
       title: "Supprimer l'URL",
@@ -283,8 +277,6 @@ export default function LimitesPage() {
           onCancel={() => setUrlsDialogOpen(false)}
         />
       )}
-
-
       {showCustomForm && editingRateLimit && (
         <CustomLimitsForm
           rateLimit={editingRateLimit}
@@ -315,7 +307,6 @@ export default function LimitesPage() {
           onCancel={() => setShowWizard(false)}
         />
       )}
-
       {showAssignForm && assignUrlId && (
         <AssignUrlUserStepper
           user={editingUser}
@@ -327,13 +318,11 @@ export default function LimitesPage() {
           }}
         />
       )}
-
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Limites de taux</h1>
           <p className="text-gray-600">Administrez les privilèges d'accès et réglez les limites de consommation assignées à chaque utilisateur.</p>
         </div>
-
         {successMessage && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-4 shadow-sm">
             <span className="w-2 h-2 rounded-full bg-green-500 shrink-0 mt-2" />
@@ -408,7 +397,6 @@ export default function LimitesPage() {
                 Actualiser
               </button>
             </div>
-
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
               {rateLimitsLoading ? (
                 <div className="py-20 flex flex-col items-center justify-center">
@@ -451,7 +439,6 @@ export default function LimitesPage() {
             </div>
           </div>
         )}
-
         {activeTab === 'urls' && (
           <div className="space-y-6">
             {urlsError && (
@@ -483,7 +470,6 @@ export default function LimitesPage() {
                 Déclarer une nouvelle URL
               </button>
             </div>
-
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
               {urlsLoading ? (
                 <div className="py-20 flex flex-col items-center justify-center">
