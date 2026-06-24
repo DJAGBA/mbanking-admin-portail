@@ -61,7 +61,7 @@ export default function BanksPage() {
   const handleCreate = async (data: CreateBankRequest) => {
   try {
     const response = await createBank(data);
-    if (response?.status?.code !== 200) {
+    if (response?.status?.code !== 201) {
       setError(response?.status?.message ?? 'Erreur lors de la création');
     } else {
       if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {

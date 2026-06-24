@@ -95,7 +95,7 @@ export default function PlansPage() {
       if (editingPlan) {
         const response = await updatePlan(String(editingPlan.id), data);
         if (response?.status?.code !== 200) {
-          setError(response?.status?.description ?? 'Erreur lors de la modification');
+        setError(response?.status?.description ?? 'Erreur lors de la modification');
         }else{
         setSuccessMessage('Le plan tarifaire a été modifié avec succès !');
         setEditingPlan(null);
@@ -123,7 +123,7 @@ export default function PlansPage() {
       }
     } catch (err: unknown) {
       const error = err as Error;
-      setError(error?.message || "Erreur lors de l'affectation");
+      throw error;
     }
   };
 
@@ -152,7 +152,8 @@ export default function PlansPage() {
               pointsPerHour: plan.pointsPerHour !== null ? Number(plan.pointsPerHour) : 0,
               pointsPerDay: plan.pointsPerDay !== null ? Number(plan.pointsPerDay) : 0,
               description: plan.description || '',
-          
+              active: nvoStatut,
+              
             };
           const response =  await updatePlan(String(plan.id), payload);
           if (response?.status?.code !== 200) {

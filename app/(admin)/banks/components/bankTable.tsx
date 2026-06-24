@@ -18,7 +18,7 @@ interface ActionButtonProps {
 // Component to display a table of partner banks with their details and actions (view details, edit, delete)
 const ActionButton = ({ onClick, icon: Icon, label, variant = 'blue' }: ActionButtonProps) => {
   const variants = {
-    blue: 'text-primary hover:bg-primary', 
+    blue: 'text-primary hover:bg-blue-50', 
     green: 'text-green-600 hover:bg-green-50',
     red: 'text-red-600 hover:bg-red-50',
   };
@@ -78,7 +78,7 @@ export function BankTable({ banks, onEdit, onDelete }: BankTableProps) {
                 <span className="text-gray-600">{bank.version || '—'}</span>
               </td>
               <td className="px-6 py-4">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-primary text-white">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue text-white">
                   {bank.services?.length || 0} service(s)
                 </span>
               </td>

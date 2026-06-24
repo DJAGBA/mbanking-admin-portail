@@ -31,7 +31,7 @@ export type CreatePlanRequest = {
 }
 
 export type UpdatePlanRequest = Partial<CreatePlanRequest>
-
+& { active?: boolean }
 export type ListPlansResponse = {
   status: {
     code: number

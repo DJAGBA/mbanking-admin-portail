@@ -139,8 +139,18 @@ export function BankForm({ bank, onSubmit, onCancel }: BankFormProps) {
 
       await onSubmit(data);
     } catch (err: unknown) {
-      const error = err as Error;
-      setError(error?.message || 'Une erreur est survenue');
+      console.error("Erreur détectée :", err);
+      
+      let message = 'Une erreur est survenue';
+      
+      if (err instanceof Error) {
+        message = err.message;
+      } else if (err && typeof err === 'object' && 'response' in (err as any)) {
+        const errorData = (err as any).response?.data;
+        message = errorData?.message || errorData?.error || message;
+      }
+      
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -160,6 +170,8 @@ export function BankForm({ bank, onSubmit, onCancel }: BankFormProps) {
     bankMiniStatementUrl: 'https://connector.example.tg/api/mbanking/transfer/mini-statement',
     bankFeesUrl: 'https://connector.example.tg/api/mbanking/transfer/get-bank-fees',
   };
+  const isServiceSelected = (key: string) =>
+  services.some(service => service.key === key && service.selected);
 
   return (
     <div
@@ -349,68 +361,8 @@ export function BankForm({ bank, onSubmit, onCancel }: BankFormProps) {
               </div>
             </div>
           </div>
-          {/* URLs */}
-          <div>
-            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">URLs des services</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { name: 'bankTokenUrl', label: 'URL Token' },
-                { name: 'bankAccountLinkRequestUrl', label: 'URL Account Link Request' },
-                { name: 'bankAccountLinkValidateUrl', label: 'URL Account Link Validate' },
-                { name: 'bankAccountListUrl', label: 'URL Account List' },
-                { name: 'bankBalanceEnquiryUrl', label: 'URL Solde' },
-                { name: 'bankCheckStatusUrl', label: 'URL Check Status' },
-                { name: 'bankFailedNotifUrl', label: 'URL Failed Notif' },
-                { name: 'bankToWalletTransferUrl', label: <>URL Banque → Wallet <span className="text-red-600">*</span></>, required: true                 },
-                { name: 'walletToBankTransferUrl', label: <>URL Wallet → Banque <span className="text-red-600">*</span></>,  required: true},
-                { name: 'bankToBankTransferUrl',label: <>URL Banque → Banque <span className="text-red-600">*</span></>,required: true},
-                { name: 'bankMiniStatementUrl', label: 'URL Mini-relevé' },
-                { name: 'bankFeesUrl', label: 'URL Frais' },
-              ].map(({ name, label }) => (
-                <div key={name}>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">{label}</label>
-                  <input
-                    type="url"
-                    name={name}
-                    value={formData[name as keyof typeof formData]}
-                    onChange={handleChange}
-                    placeholder={urlPlaceholders[name as keyof typeof urlPlaceholders] || ''}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-                  />
-                </div>
-              ))}
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Seuil mini-relevé <span className="text-red-600">*</span></label>
-                <input
-                  type="number"
-                  name="miniStatementTreshold"
-                  value={formData.miniStatementTreshold}
-                  onChange={handleChange}
-                  required
-                  placeholder="Montant minimum pour mini-relevé"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Validité OTP (secondes) <span className="text-red-600">*</span>
 
-                </label>
-                <input
-                  type="number"
-                  name="otpValidity"
-                  value={formData.otpValidity}
-                  onChange={handleChange}
-                  required
-                  placeholder="Durée de validité de l'OTP en secondes"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary bg-white"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* SERVICES — only at creation*/}
+           {/* SERVICES — only at creation*/}
           {!bank && (
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -492,6 +444,172 @@ export function BankForm({ bank, onSubmit, onCancel }: BankFormProps) {
               </div>
             </div>
           )}
+          {/* URLs des services */}
+<div>
+  <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">
+    URLs des services
+  </h3>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+    {/* Toujours affichées */}
+    {[
+      { name: 'bankTokenUrl', label: 'URL Token' },
+      { name: 'bankAccountLinkRequestUrl', label: 'URL Account Link Request' },
+      { name: 'bankAccountLinkValidateUrl', label: 'URL Account Link Validate' },
+      { name: 'bankAccountListUrl', label: 'URL Account List' },
+      { name: 'bankCheckStatusUrl', label: 'URL Check Status' },
+      { name: 'bankFailedNotifUrl', label: 'URL Failed Notif' },
+      { name: 'bankFeesUrl', label: 'URL Frais' },
+    ].map(({ name, label }) => (
+      <div key={name}>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">
+          {label}
+        </label>
+
+        <input
+          type="url"
+          name={name}
+          value={formData[name as keyof typeof formData]}
+          onChange={handleChange}
+          placeholder={
+            urlPlaceholders[name as keyof typeof urlPlaceholders] || ''
+          }
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+        />
+      </div>
+    ))}
+
+    {/* Balance */}
+    {isServiceSelected('balance') && (
+      <div>
+  <label className="block text-sm font-semibold text-gray-900 mb-2">
+    URL Solde <span className="text-red-600">*</span>
+  </label>
+
+  <input
+    type="url"
+    name="bankBalanceEnquiryUrl"
+    value={formData.bankBalanceEnquiryUrl}
+    onChange={handleChange}
+    required
+    placeholder={urlPlaceholders.bankBalanceEnquiryUrl}
+    className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+  />
+</div>
+    )}
+
+    {/* Bank to Wallet */}
+    {isServiceSelected('bank-to-wallet') && (
+      <div>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">
+          URL Banque → Wallet <span className="text-red-600">*</span>
+        </label>
+
+        <input
+          type="url"
+          name="bankToWalletTransferUrl"
+          value={formData.bankToWalletTransferUrl}
+          onChange={handleChange}
+          required
+          placeholder={urlPlaceholders.bankToWalletTransferUrl}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+        />
+      </div>
+    )}
+
+    {/* Wallet to Bank */}
+    {isServiceSelected('wallet-to-bank') && (
+      <div>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">
+          URL Wallet → Banque <span className="text-red-600">*</span>
+        </label>
+
+        <input
+          type="url"
+          name="walletToBankTransferUrl"
+          value={formData.walletToBankTransferUrl}
+          onChange={handleChange}
+          required
+          placeholder={urlPlaceholders.walletToBankTransferUrl}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+        />
+      </div>
+    )}
+
+    {/* Bank to Bank */}
+    {isServiceSelected('bank-to-bank') && (
+      <div>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">
+          URL Banque → Banque <span className="text-red-600">*</span>
+        </label>
+
+        <input
+          type="url"
+          name="bankToBankTransferUrl"
+          value={formData.bankToBankTransferUrl}
+          onChange={handleChange}
+          required
+          placeholder={urlPlaceholders.bankToBankTransferUrl}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+        />
+      </div>
+    )}
+
+    {/* Mini Statement */}
+    {isServiceSelected('mini-statement') && (
+      <>
+        <div>
+          <label className="block text-sm font-semibold text-gray-900 mb-2">
+            URL Mini-relevé
+          </label>
+
+          <input
+            type="url"
+            name="bankMiniStatementUrl"
+            value={formData.bankMiniStatementUrl}
+            onChange={handleChange}
+            placeholder={urlPlaceholders.bankMiniStatementUrl}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-gray-900 mb-2">
+            Seuil mini-relevé <span className="text-red-600">*</span>
+          </label>
+
+          <input
+            type="number"
+            name="miniStatementTreshold"
+            value={formData.miniStatementTreshold}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+          />
+        </div>
+      </>
+    )}
+
+    {/* OTP */}
+    <div>
+      <label className="block text-sm font-semibold text-gray-900 mb-2">
+        Validité OTP (secondes) <span className="text-red-600">*</span>
+      </label>
+
+      <input
+        type="number"
+        name="otpValidity"
+        value={formData.otpValidity}
+        onChange={handleChange}
+        required
+        placeholder="Durée de validité de l'OTP en secondes"
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary bg-white"
+      />
+    </div>
+
+  </div>
+</div>
           {/* FOOTER */}
           <div className="flex gap-3 pt-2">
             <button

@@ -98,27 +98,26 @@ useEffect(() => {
 
   const prevStep = () => setStep(prev => prev - 1);
 
-  const handleSubmit = async () => {
-    setLoading(true);
-    setError('');
-    const endDate = formData.endDate ? `${formData.endDate}T23:59:59Z` : '';
-    try {
-      const data: AssignPlanRequest = {
-        planName: formData.planName,
-        ...(formData.customPointsPerMinute && { customPointsPerMinute: Number(formData.customPointsPerMinute) }),
-        ...(formData.customPointsPerHour && { customPointsPerHour: Number(formData.customPointsPerHour) }),
-        ...(formData.customPointsPerDay && { customPointsPerDay: Number(formData.customPointsPerDay) }),
-        endDate,
-        ...(formData.notes && { notes: formData.notes }),
-      };
-      await onSubmit(selectedUserIds, data);
-    } catch (err: unknown) {
-      const error = err as Error;
-      setError(error?.message || "Erreur lors de l'affectation");
-    } finally {
-      setLoading(false);
-    }
-  };
+ const handleSubmit = async () => {
+  setLoading(true);
+  setError('');
+  try {
+    const data: AssignPlanRequest = {
+      planName: formData.planName.toLowerCase(),
+      ...(formData.customPointsPerMinute && { customPointsPerMinute: Number(formData.customPointsPerMinute) }),
+      ...(formData.customPointsPerHour && { customPointsPerHour: Number(formData.customPointsPerHour) }),
+      ...(formData.customPointsPerDay && { customPointsPerDay: Number(formData.customPointsPerDay) }),
+      ...(formData.endDate && { endDate: `${formData.endDate}T23:59:59Z` }), // ← n'envoie endDate que si elle existe
+      ...(formData.notes && { notes: formData.notes }),
+    };
+    await onSubmit(selectedUserIds, data);
+  } catch (err: unknown) {
+    const error = err as Error;
+    setError(error?.message || "Erreur lors de l'affectation");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const filteredUsers = users.filter(user =>
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||

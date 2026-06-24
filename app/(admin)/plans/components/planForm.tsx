@@ -77,6 +77,7 @@ export function PlanForm({ plan, onSubmit, onCancel }: PlanFormProps) {
           <h2 className="text-xl font-bold text-gray-900">
             {plan ? 'Modifier le plan' : 'Créer un plan'}
           </h2>
+
           <button
             type="button"
             onClick={onCancel}
@@ -91,7 +92,7 @@ export function PlanForm({ plan, onSubmit, onCancel }: PlanFormProps) {
           {/* Error */}
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-              <p className="text-red-800 text-sm font-medium">{error}</p>
+              <p className="text-red-600 text-sm font-medium">{error}</p>
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">

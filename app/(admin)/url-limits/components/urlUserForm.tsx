@@ -14,7 +14,6 @@ type UserWithLimits = {
 }
 
 const USERS_PER_PAGE = 5;
-
 export function AssignUrlUserStepper({
   user,
   onSubmit,

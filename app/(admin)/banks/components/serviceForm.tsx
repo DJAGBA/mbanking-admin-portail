@@ -60,7 +60,7 @@ export function ServiceForm({ onSubmit, onCancel }: ServiceFormProps) {
         {/* ERROR */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-            <p className="text-red-800 text-sm font-medium">{error}</p>
+            <p className="text-red-600 text-sm font-medium">{error}</p>
           </div>
         )}
         {/* FORM */}
